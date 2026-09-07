@@ -20,3 +20,4 @@ class ApiSettings(BaseSettings):
 
 settings = ApiSettings()
 
+
