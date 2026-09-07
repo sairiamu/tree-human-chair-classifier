@@ -1,3 +1,4 @@
+```yaml
 name: Build and Push Docker Images
 
 on:
@@ -5,17 +6,19 @@ on:
     branches:
       - main
     tags:
-      - 'v*'
+      - "v*"
   pull_request:
     branches:
       - main
+
+permissions:
+  contents: read
 
 jobs:
   build-and-push:
     name: Build and Push ${{ matrix.service }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+
     strategy:
       fail-fast: false
       matrix:
@@ -23,6 +26,7 @@ jobs:
           - service: api
             dockerfile: docker/Dockerfile.api
             image: tree-human-chair-api
+
           - service: web
             dockerfile: docker/Dockerfile.web
             image: tree-human-chair-web
@@ -45,21 +49,29 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKERHUB_USERNAME || 'local' }}/${{ matrix.image }}
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}
           tags: |
+            # main branch
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+            # Git commit SHA
             type=sha,prefix=sha-,format=short
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=ref,event=pr
+
+            # Git tag: v1.2.3 -> 1.2.3
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+
+            # Git tag: v1.2.3 -> 1.2
+            type=semver,pattern={{major}}.{{minor}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ${{ matrix.dockerfile }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.service }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+```
+
