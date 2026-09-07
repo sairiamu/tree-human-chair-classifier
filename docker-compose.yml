@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: classifier
+      POSTGRES_PASSWORD: classifier
+      POSTGRES_DB: classifier
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U classifier"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    environment:
+      DATABASE_URL: postgresql+psycopg2://classifier:classifier@postgres:5432/classifier
+      UPLOAD_DIR: /app/uploads
+      SUPPORT_SET_DIR: /app/data/support_set
+      CHECKPOINT_PATH: /app/checkpoints/tree_human_chair.json
+      CORS_ORIGINS: http://localhost:8080
+    volumes:
+      - support_set_data:/app/data/support_set
+      - checkpoint_data:/app/checkpoints
+      - upload_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  support_set_data:
+  checkpoint_data:
+  upload_data:
+    
