@@ -1,0 +1,21 @@
+# AdaptShot learner configuration
+model:
+  backbone: mobilenet_v3_small   # ships ONNX in the wheel — no torch needed
+  device: cpu
+  seed: 42
+  inference_mode: prototypical
+  calibration_method: temperature
+  conformal_alpha: 0.10          # 90% coverage target
+  conformal_mode: split
+  uncertainty_mode: ensemble
+  max_buffer_size: 100
+
+data:
+  support_set_dir: data/support_set
+  classes:
+    - tree
+    - human
+    - chair
+
+paths:
+  checkpoint: checkpoints/tree_human_chair.json

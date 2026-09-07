@@ -1,0 +1,2 @@
+adaptshot>=0.3.0
+pyyaml>=6.0

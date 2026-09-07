@@ -1,0 +1,25 @@
+[project]
+name = "tree-human-chair-classifier"
+version = "0.1.0"
+description = "Few-shot CPU classifier for tree / human / chair using AdaptShot"
+requires-python = ">=3.10"
+dependencies = [
+    "adaptshot>=0.3.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+    "mypy>=1.10",
+]
+torch = [
+    "adaptshot[torch]",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.mypy]
+strict = true
