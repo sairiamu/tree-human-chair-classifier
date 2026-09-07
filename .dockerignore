@@ -1,0 +1,53 @@
+# Git
+.git
+.github
+.gitignore
+
+# Python
+.venv
+venv
+env
+ENV
+virtualenv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+
+# Node
+node_modules
+web/node_modules
+web/dist
+npm-debug.log*
+
+# Data and large files (managed by volumes)
+data/
+checkpoints/
+uploads/
+test-data/
+
+# Environment / Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+docker-compose*.yaml
+docker/nginx.conf

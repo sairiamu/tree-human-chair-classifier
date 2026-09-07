@@ -2,13 +2,13 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: classifier
-      POSTGRES_PASSWORD: classifier
-      POSTGRES_DB: classifier
+      POSTGRES_USER: ${POSTGRES_USER:-classifier}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-classifier}
+      POSTGRES_DB: ${POSTGRES_DB:-classifier}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U classifier"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-classifier}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -18,11 +18,11 @@ services:
       context: .
       dockerfile: docker/Dockerfile.api
     environment:
-      DATABASE_URL: postgresql+psycopg2://classifier:classifier@postgres:5432/classifier
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-classifier}:${POSTGRES_PASSWORD:-classifier}@postgres:5432/${POSTGRES_DB:-classifier}
       UPLOAD_DIR: /app/uploads
       SUPPORT_SET_DIR: /app/data/support_set
       CHECKPOINT_PATH: /app/checkpoints/tree_human_chair.json
-      CORS_ORIGINS: http://localhost:8080
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
     volumes:
       - support_set_data:/app/data/support_set
       - checkpoint_data:/app/checkpoints

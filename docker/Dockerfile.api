@@ -20,6 +20,11 @@ RUN mkdir -p /app/data/support_set/tree \
              /app/checkpoints \
              /app/uploads/predictions
 
+RUN useradd -m -u 1000 appuser && \
+    chown -R appuser:appuser /app
+
+USER appuser
+
 ENV PYTHONPATH=/app/src:/app
 
 EXPOSE 8000
