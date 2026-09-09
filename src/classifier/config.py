@@ -27,6 +27,9 @@ def load_settings(path: str | Path = "config/settings.yaml") -> Settings:
         ValueError: if required keys are missing.
     """
     config_path = Path(path)
+    if not config_path.is_absolute() and str(path) == "config/settings.yaml":
+        project_root = Path(__file__).resolve().parents[2]
+        config_path = project_root / config_path
     if not config_path.exists():
         raise FileNotFoundError(f"Config file not found: {config_path}")
 
@@ -52,9 +55,15 @@ def load_settings(path: str | Path = "config/settings.yaml") -> Settings:
         max_buffer_size=model_cfg.get("max_buffer_size", 100),
     )
 
+    project_root = config_path.parent.parent
     return Settings(
         adaptshot_config=adaptshot_config,
-        support_set_dir=Path(data_cfg["support_set_dir"]),
+        support_set_dir=_resolve_project_path(data_cfg["support_set_dir"], project_root),
         classes=list(data_cfg["classes"]),
-        checkpoint_path=Path(paths_cfg["checkpoint"]),
+        checkpoint_path=_resolve_project_path(paths_cfg["checkpoint"], project_root),
     )
+
+
+def _resolve_project_path(path: str | Path, project_root: Path) -> Path:
+    resolved_path = Path(path)
+    return resolved_path if resolved_path.is_absolute() else project_root / resolved_path

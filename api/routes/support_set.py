@@ -58,7 +58,7 @@ def get_support_set_summary(db: Session = Depends(get_db)) -> SupportSetSummary:
     project_settings = get_project_settings()
 
     _, labels = load_support_set(project_settings.support_set_dir, project_settings.classes)
-    counts = class_counts(labels)
+    counts = class_counts(labels, classes=project_settings.classes)
 
     pending_rows = db.execute(
         select(SupportImageRecord.class_name, func.count())
@@ -86,6 +86,18 @@ def rebuild_model(db: Session = Depends(get_db)) -> RebuildOut:
     lock = get_model_lock()
 
     with lock:
+        # Verify we have images for all required classes before attempting a rebuild
+        image_paths, labels = load_support_set(project_settings.support_set_dir, project_settings.classes)
+        counts = class_counts(labels, classes=project_settings.classes)
+
+        missing_classes = [c for c, count in counts.items() if count == 0]
+        if missing_classes:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot rebuild: The following classes have no images: {missing_classes}. "
+                       "Please upload at least one image for each class."
+            )
+
         try:
             new_model = ClassifierModel(project_settings.adaptshot_config)
             new_model.fit(project_settings.support_set_dir, project_settings.classes)
@@ -97,7 +109,7 @@ def rebuild_model(db: Session = Depends(get_db)) -> RebuildOut:
         set_model(new_model)
 
     _, labels = load_support_set(project_settings.support_set_dir, project_settings.classes)
-    counts = class_counts(labels)
+    counts = class_counts(labels, classes=project_settings.classes)
 
     db.query(SupportImageRecord).update({SupportImageRecord.included_in_build: True})
 

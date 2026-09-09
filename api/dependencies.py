@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import threading
+from fastapi import HTTPException
 
 from classifier.config import load_settings
 from classifier.model import ClassifierModel
@@ -21,8 +22,25 @@ def get_model() -> ClassifierModel:
     if _model is None:
         with _model_lock:
             if _model is None:
+                if not _project_settings.checkpoint_path.exists():
+                    logger.warning(
+                        f"Model checkpoint not found at {_project_settings.checkpoint_path}. "
+                        "The model needs to be built first via /support-set/rebuild"
+                    )
+                    raise HTTPException(
+                        status_code=503,
+                        detail="Model not ready. Please ensure the support set is built."
+                    )
+
                 logger.info("Loading model from checkpoint...")
-                _model = ClassifierModel.load(_project_settings.checkpoint_path)
+                try:
+                    _model = ClassifierModel.load(_project_settings.checkpoint_path)
+                except Exception as exc:
+                    logger.exception("Failed to load model from checkpoint")
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Failed to load model: {exc}"
+                    )
     return _model
 
 
