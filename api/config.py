@@ -13,12 +13,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class ApiSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    database_url: str = "postgresql+psycopg2://classifier:classifier@localhost:5432/classifier"
+    database_url: str = "sqlite:///./classifier.db"
     upload_dir: Path = Path("uploads")
     support_set_dir: Path = Path("data/support_set")
     checkpoint_path: Path = Path("checkpoints/tree_human_chair.json")
     classes: Any = ["tree", "human", "chair"]
-    cors_origins: Any = ["http://localhost:5173"]
+    cors_origins: Any = ["http://localhost:5173", "http://localhost:3000"]
 
     @field_validator("classes", "cors_origins", mode="before")
     @classmethod

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, JSON, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -30,7 +30,7 @@ class PredictionRecord(Base):
     corrected_label: Mapped[str | None] = mapped_column(String(50), nullable=True)
     corrected_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class SupportImageRecord(Base):
@@ -40,7 +40,7 @@ class SupportImageRecord(Base):
     class_name: Mapped[str] = mapped_column(String(50))
     filename: Mapped[str] = mapped_column(String(255))
     path: Mapped[str] = mapped_column(String(512))
-    uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
     included_in_build: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
@@ -50,6 +50,6 @@ class ModelBuildRecord(Base):
     __tablename__ = "model_builds"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    triggered_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    triggered_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
     class_counts: Mapped[dict] = mapped_column(JSON)
     checkpoint_path: Mapped[str] = mapped_column(String(512))

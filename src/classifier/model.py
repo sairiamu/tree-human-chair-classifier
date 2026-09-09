@@ -65,11 +65,10 @@ class ClassifierModel:
         if not checkpoint_path.exists():
             raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
 
-        instance = cls.__new__(cls)
-        instance._learner = FewShotLearner.load(str(checkpoint_path))
-        instance._config = instance._learner._config if hasattr(
-            instance._learner, "_config"
-        ) else None
+        learner = FewShotLearner.load(str(checkpoint_path))
+        # Use the config from the loaded learner
+        instance = cls(config=learner.config)
+        instance._learner = learner
         instance._is_fitted = True
         logger.info("Checkpoint loaded from %s", checkpoint_path)
         return instance

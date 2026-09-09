@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -51,7 +51,7 @@ def correct(
 
     record.corrected = True
     record.corrected_label = payload.true_label
-    record.corrected_at = datetime.utcnow()
+    record.corrected_at = datetime.now(timezone.utc)
     db.commit()
 
     return CorrectionOut(

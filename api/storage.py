@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 import uuid
 from pathlib import Path
 
@@ -29,7 +30,10 @@ def save_upload(upload: UploadFile, target_dir: Path) -> tuple[str, Path]:
     stored_filename = f"{uuid.uuid4().hex}{suffix}"
     full_path = target_dir / stored_filename
 
-    with full_path.open("wb") as f:
-        f.write(upload.file.read())
+    try:
+        with full_path.open("wb") as f:
+            shutil.copyfileobj(upload.file, f)
+    finally:
+        upload.file.close()
 
     return stored_filename, full_path
